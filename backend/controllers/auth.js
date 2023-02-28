@@ -1,15 +1,13 @@
 const User = require('../models/User');
 
-const { generateJwtToken } = require('../utils/authUtils');
+const { generateJwtToken, sendOtp, verifyOtpHash } = require('../utils/authUtils');
 
 const login = (email, password) => {
     return new Promise((resolve, reject) => {
         User.findOne({ email })
             .then(user => {
-                if (!user) {
-                    register(email, password)
-                        .then(token => resolve(token))
-                        .catch(err => reject(err));
+                if (!user || !user.otp_verified) {
+                    reject({ msg: 'Invalid Credentials', err: { email: 'User not found' }, status: 404 });
                 } else if (user.authenticate(password)) {
                     user = {
                         id: user._id,
@@ -33,31 +31,130 @@ const login = (email, password) => {
 
 const register = (email, password) => {
     return new Promise((resolve, reject) => {
-        const newUser = new User({
-            email,
-            password
-        });
-
-        newUser.save()
+        User.findOne({ email })
             .then(user => {
-                user = {
-                    id: user._id,
-                    email: user.email,
-                    role: user.role
-                };
+                if (user) {
+                    if (user.otp_verified) {
+                        reject({ msg: 'User already exists', err: { email: 'User already exists' }, status: 400 });
+                    } else {
+                        sendOtp(email, 'OTP to verify foody registration')
+                            .then(otpHash => resolve(otpHash))
+                            .catch(err => reject(err));
+                    }
+                } else {
+                    const newUser = new User({
+                        email,
+                        password
+                    });
 
-                generateJwtToken(user)
-                    .then(token => resolve(token))
-                    .catch(err => reject(err));
+                    newUser.save()
+                        .then(user => {
+                            sendOtp(email, 'OTP to verify foody registration')
+                                .then(otpHash => resolve(otpHash))
+                                .catch(err => reject(err));
+                        })
+                        .catch(err => {
+                            console.error(`[AuthController][register][${email}] Error: ${err}`);
+                            reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+                        });
+                }
             })
-            .catch(err => {
-                console.error(`[AuthController][register][${email}] Error: ${err}`);
-                reject({ msg: 'Internal Server Error', err: {}, status: 500 });
-            });
+            .catch(err => reject(err))
     });
 };
 
+const verifyOtp = (email, otp, otpHash) => {
+    return new Promise((resolve, reject) => {
+        verifyOtpHash(otp, email, otpHash, (err) => {
+            if (err) reject({ msg: err, err: {}, status: 400 });
+        });
+
+        User.findOne({ email })
+            .then(user => {
+                if (!user) reject({ msg: 'User not found', err: { email: 'User not found' }, status: 404 });
+
+                user.otp_verified = true;
+                user.save()
+                    .then(user => {
+                        user = {
+                            id: user._id,
+                            email: user.email,
+                            role: user.role
+                        };
+
+                        generateJwtToken(user)
+                            .then(token => resolve(token))
+                            .catch(err => reject(err));
+                    })
+                    .catch(err => {
+                        console.error(`[AuthController][verifyOtp][${email}] Error: ${err}`);
+                        reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+                    });
+            })
+            .catch(err => {
+                console.error(`[AuthController][verifyOtp][${email}] Error: ${err}`);
+                reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+            });
+    });
+}
+
+const forgotPassword = (email) => {
+    return new Promise((resolve, reject) => {
+        User.findOne({ email })
+            .then(user => {
+                if (!user) reject({ msg: 'User not found. Please register to continue', err: { email: 'User not found' }, status: 404 });
+
+                sendOtp(email, 'OTP to reset foody password')
+                    .then(otpHash => resolve(otpHash))
+                    .catch(err => reject(err));
+            })
+            .catch(err => {
+                console.error(`[AuthController][forgotPassword][${email}] Error: ${err}`);
+                reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+            });
+    });
+}
+
+const resetPassword = (email, password, otp, otpHash) => {
+    return new Promise((resolve, reject) => {
+        User.findOne({ email })
+            .then(user => {
+                if (!user) reject({ msg: 'User not found', err: { email: 'User not found' }, status: 404 });
+
+                verifyOtpHash(otp, email, otpHash, (err) => {
+                    if (err) reject({ msg: err, err: {}, status: 400 });
+                });
+
+                user.password = password;
+                user.save()
+                    .then(user => {
+                        user = {
+                            id: user._id,
+                            email: user.email,
+                            role: user.role
+                        };
+
+                        generateJwtToken(user)
+                            .then(token => resolve(token))
+                            .catch(err => reject(err));
+                    })
+                    .catch(err => {
+                        console.error(`[AuthController][resetPassword][${email}] Error: ${err}`);
+                        reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+                    });
+            })
+            .catch(err => {
+                console.error(`[AuthController][resetPassword][${email}] Error: ${err}`);
+                reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+            })
+    });
+}
+
 
 module.exports = {
-    login
+    login,
+    register,
+    verifyOtp,
+    forgotPassword,
+    resetPassword
 };
