@@ -24,8 +24,7 @@ import {
 const App = () => {
 	const dispatch = useDispatch();
 
-
-	// Check Auth Token
+	// On website reload check local storage for auth_token and login user if exists and valid
 	const auth_token = localStorage.getItem('auth_token');
 	if (auth_token) {
 		dispatch(login(auth_token));

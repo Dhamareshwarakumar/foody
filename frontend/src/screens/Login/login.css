@@ -28,13 +28,13 @@
     }
 
     .login__form-container {
-        flex: 3;
+        flex: 5;
         justify-content: flex-start;
         padding: 12px 12px 0 12px;
     }
 
     .login__img-container {
-        flex: 2;
+        flex: 3;
         border-radius: 0px 0px 8px 8px;
     }
 }
@@ -70,6 +70,30 @@
         margin-top: 16px;
         margin-bottom: 16px;
     }
+}
+
+.login__form-container__form__register {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.login__form-container__form__register p {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .login__form-container__form__register p {
+        font-size: 12px;
+    }
+}
+
+.login__form-container__form__register p:hover {
+    cursor: pointer;
+    color: #000;
 }
 
 .login__form-container__other {

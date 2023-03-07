@@ -8,6 +8,8 @@ const initialState = {
     isAuthenticated: false,
     user: null,     // { id, email, role }
     loading: false,
+    formType: 'login',   // login / register / otp / fogotPassword / resetPassword //
+    hash: null
 };
 
 export const authSlice = createSlice({
@@ -35,13 +37,24 @@ export const authSlice = createSlice({
         logout: (state) => {
             state.isAuthenticated = false;
             state.user = null;
+
+            localStorage.removeItem('auth_token');
+            setAuthToken();
         },
         setLoading: (state, action) => {
             state.loading = action.payload;
+        },
+        setFormType: (state, action) => {
+            if (['login', 'register', 'otp', 'forgotPassword', 'resetPassword'].includes(action.payload)) {
+                state.formType = action.payload;
+            }
+        },
+        setHash: (state, action) => {
+            state.hash = action.payload;
         }
     }
 });
 
-export const { login, logout, setLoading } = authSlice.actions;
+export const { login, logout, setLoading, setFormType, setHash } = authSlice.actions;
 
 export default authSlice.reducer;

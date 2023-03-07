@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const isJwtTokenExpired = (tokenPayload) => Date.now() / 1000 > tokenPayload.exp;
 
-export const setAuthToken = (token) => {
+export const setAuthToken = (token = null) => {
     if (token) {
         axios.defaults.headers.common['Authorization'] = token;
     } else {

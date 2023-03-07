@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 const Input = (params) => {
+    const [inputType, setInputType] = useState(params.type);
+
+    useEffect(() => {
+        setInputType(params.type);
+    }, [params.type]);
+
     return (
-        <div className='form-group'>
+        <div className='form-group' style={{ position: 'relative' }}>
             <input
-                type={params.type}
+                type={inputType}
                 name={params.name}
                 className={`form-control ` + (params.error ? 'is-invalid' : '') + (params.className ? params.className : '')}
                 placeholder={params.placeholder}
@@ -15,6 +21,12 @@ const Input = (params) => {
                 style={params.style}
             />
             {params.error && (<p className='error-feedback'>{params.error}</p>)}
+            {params.type === 'password' && (
+                <i
+                    className={`fa-regular fa-eye` + (inputType === 'password' ? '-slash' : '')}
+                    onClick={() => setInputType(inputType === 'password' ? 'text' : 'password')}
+                ></i>
+            )}
         </div>
     );
 }

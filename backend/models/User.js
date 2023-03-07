@@ -19,6 +19,10 @@ const userSchema = new Schema({
         type: Number,
         default: 0
     },
+    otp_verified: {
+        type: Boolean,
+        default: false
+    },
     salt: {
         type: String,
         default: uuidv4()
