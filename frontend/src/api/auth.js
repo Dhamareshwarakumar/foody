@@ -104,3 +104,19 @@ export const resetPassword = (email, password, otp, hash) => dispatch => {
         })
         .finally(() => dispatch(setLoading(false)));
 }
+
+export const oauthLogin = (accessToken, provider) => dispatch => {
+    dispatch(setLoading(true));
+    dispatch(setErrors({}));
+
+    axios.post('/auth/google', { accessToken })
+        .then(res => {
+            toast.success(res.data.msg);
+            localStorage.setItem('auth_token', res.data.token.split(' ')[1]);
+            dispatch(loginAction(res.data.token.split(' ')[1]));
+        })
+        .catch(err => {
+            toast.error(err.response.data.msg);
+        })
+        .finally(() => dispatch(setLoading(false)));
+}

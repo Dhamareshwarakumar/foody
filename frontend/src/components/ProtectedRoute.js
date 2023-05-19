@@ -8,20 +8,17 @@ const ProtectedRoute = ({ children, roles }) => {
     const navigate = useNavigate();
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
     const user = useSelector(state => state.auth.user);
+    const loading = useSelector(state => state.auth.loading);
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/login');
-        }
-    }, [isAuthenticated, navigate]);
+        loading || isAuthenticated || navigate('/login');
+    }, [isAuthenticated, navigate, loading]);
 
     useEffect(() => {
-        if (roles.length && !roles.includes(user.role)) {
-            navigate('/');
-        }
-    }, [roles, user, navigate]);
+        loading || ((roles.length && !roles.includes(user?.role)) && navigate('/'));
+    }, [roles, user, navigate, loading]);
 
-    return children;
+    return loading ? <h1>Loading...</h1> : children;
 };
 
 ProtectedRoute.defaultProps = {

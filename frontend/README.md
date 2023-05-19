@@ -13,3 +13,5 @@ foody is an online food delivery service like zomato and swiggy.
 ## Deployment
 * `npm run build`
 * copy the build folder to the server
+
+

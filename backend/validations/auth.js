@@ -93,9 +93,27 @@ const validateResetPassword = (req, res, next) => {
     next();
 }
 
+const allowNormalUserOnly = (req, res, next) => {
+    if (req.user.role !== 0) {
+        return res.status(403).json({ msg: 'Forbidden' });
+    }
+
+    next();
+}
+
+const allowSuperAdminOnly = (req, res, next) => {
+    if (req.user.role !== 4) {
+        return res.status(403).json({ msg: 'Forbidden' });
+    }
+
+    next();
+}
+
 module.exports = {
     validateLogin,
     validateOtp,
     validateForgotPassword,
-    validateResetPassword
+    validateResetPassword,
+    allowNormalUserOnly,
+    allowSuperAdminOnly
 };

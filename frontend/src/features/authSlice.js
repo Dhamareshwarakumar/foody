@@ -19,11 +19,6 @@ export const authSlice = createSlice({
         login: (state, action) => {
             const payload = jwt_decode(action.payload);
 
-            if (isJwtTokenExpired(payload)) {
-                toast.error('Token expired, please login again.');
-                return logout();
-            }
-
             setAuthToken(action.payload);
 
             state.isAuthenticated = true;
@@ -35,9 +30,11 @@ export const authSlice = createSlice({
             state.loading = false;
         },
         logout: (state) => {
+            console.log('Logout Called');
             state.isAuthenticated = false;
             state.user = null;
 
+            console.log('Removing Auth Token')
             localStorage.removeItem('auth_token');
             setAuthToken();
         },

@@ -1,0 +1,21 @@
+.restaurants {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.restaurants__item {
+    flex: 0 1 33%;
+    padding: 16px;
+}
+
+@media (max-width: 768px) {
+    .restaurants__item {
+        flex: 0 1 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .restaurants__item {
+        flex: 0 1 100%;
+    }
+}

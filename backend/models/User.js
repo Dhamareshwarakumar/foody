@@ -12,8 +12,7 @@ const userSchema = new Schema({
         lowercase: true
     },
     encry_password: {
-        type: String,
-        required: true
+        type: String
     },
     role: {
         type: Number,
@@ -26,12 +25,21 @@ const userSchema = new Schema({
     salt: {
         type: String,
         default: uuidv4()
+    },
+    googleId: {
+        type: String,
+        trim: true
     }
 }, { timestamps: true });
 
 userSchema.virtual('password')
     .set(function (plainPassword) {
-        this.encry_password = this.securePassword(plainPassword);
+        encryPassword = this.securePassword(plainPassword);
+        if (encryPassword) {
+            this.encry_password = encryPassword;
+        } else {
+            throw new Error('Password is not valid');
+        }
     });
 
 userSchema.methods = {
@@ -47,7 +55,10 @@ userSchema.methods = {
         }
     },
     authenticate: function (plainPassword) {
-        return crypto.timingSafeEqual(Buffer.from(this.securePassword(plainPassword)), Buffer.from(this.encry_password));
+        if (!this.encry_password) return false;
+        encryPassword = this.securePassword(plainPassword);
+        if (encryPassword) return crypto.timingSafeEqual(Buffer.from(this.securePassword(plainPassword)), Buffer.from(this.encry_password));
+        return false;
     }
 }
 

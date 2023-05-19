@@ -12,7 +12,8 @@ const {
     register,
     verifyOtp,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    googleLogin,
 } = require('../controllers/auth');
 
 router.get('/', (req, res) => {
@@ -85,6 +86,19 @@ router.post(
     (req, res) => {
         resetPassword(req.body.email, req.body.password, req.body.otp, req.body.hash)
             .then(token => res.json({ msg: 'Password Reset Successful', token }))
+            .catch(err => res.status(err.status).json({ msg: err.msg, err: err.err }));
+    }
+);
+
+// @route   POST /auth/goole
+// @desc    Login/Register user using Google
+// @access  Public
+// @params  accessToken
+router.post(
+    '/google',
+    (req, res) => {
+        googleLogin(req.body.accessToken)
+            .then(token => res.json({ msg: 'Login Successful', token }))
             .catch(err => res.status(err.status).json({ msg: err.msg, err: err.err }));
     }
 );

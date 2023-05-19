@@ -1,4 +1,6 @@
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const axios = require('axios');
 
 const { generateJwtToken, sendOtp, verifyOtpHash } = require('../utils/authUtils');
 
@@ -150,11 +152,92 @@ const resetPassword = (email, password, otp, otpHash) => {
     });
 }
 
+const googleLogin = (accessToken) => {
+    return new Promise((resolve, reject) => {
+        axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+            .then(res => {
+                console.log(res.data);
+                const { sub: googleId, email, name, picture } = res.data;
+
+                User.findOne({ email })
+                    .then(user => {
+                        if (user) {
+                            if (!user.googleId) {
+                                user.googleId = googleId;
+                                user.save()
+                                    .then(user => {
+                                        user = {
+                                            id: user._id,
+                                            email: user.email,
+                                            role: user.role
+                                        };
+
+                                        generateJwtToken(user)
+                                            .then(token => resolve(token))
+                                            .catch(err => reject(err));
+                                    })
+                                    .catch(err => {
+                                        console.error(`[AuthController][googleLogin][${email}] Error: ${err}`);
+                                        reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+                                    });
+                            }
+                            user = {
+                                id: user._id,
+                                email: user.email,
+                                role: user.role
+                            };
+
+                            generateJwtToken(user)
+                                .then(token => resolve(token))
+                                .catch(err => reject(err));
+                        } else {
+                            const newUser = new User({
+                                email,
+                                otp_verified: true,
+                                googleId
+                            })
+
+                            newUser.save()
+                                .then(user => {
+                                    user = {
+                                        id: user._id,
+                                        email: user.email,
+                                        role: user.role
+                                    };
+
+                                    generateJwtToken(user)
+                                        .then(token => resolve(token))
+                                        .catch(err => reject(err));
+                                })
+                                .catch(err => {
+                                    console.error(`[AuthController][googleLogin][${email}] Error: ${err}`);
+                                    reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+                                });
+                        }
+                    })
+                    .catch(err => {
+                        console.error(`[AuthController][googleLogin][${email}] Error: ${err}`);
+                        reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+                    });
+
+            })
+            .catch(err => {
+                console.error(`[AuthController][googleLogin] Error: ${err}`);
+                reject({ msg: 'Internal Server Error', err: {}, status: 500 });
+            });
+    });
+}
+
 
 module.exports = {
     login,
     register,
     verifyOtp,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    googleLogin
 };

@@ -1,0 +1,6 @@
+@base_uri=http://localhost:3333/api
+@version=http/1.1
+@token=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MGI2Y2FhZjU1YTAyYjBlODNjNGNlYiIsImVtYWlsIjoiYWRtaW5AZm9vZHkuY29tIiwicm9sZSI6NCwiaWF0IjoxNjc4NDgxNzA1LCJleHAiOjE2Nzg1NjgxMDV9.2SDS7bbt-D6sQdsev3L9L4yPmSfJwA4kox7EpQ2A4zA
+
+GET {{base_uri}}/super-admin/pending-restaurants {{version}}
+Authorization: {{token}}

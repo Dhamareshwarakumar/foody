@@ -1,0 +1,50 @@
+@base_uri=http://localhost:3333/api
+
+@version=http/1.1
+
+@token=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZWU4NzQ3OTE0YjVlMWJhMmRkODY4MiIsImVtYWlsIjoiZGFtYXJlc2h3YXJha3VtYXJAZ21haWwuY29tIiwicm9sZSI6MCwiaWF0IjoxNjc4NDc1MTg2LCJleHAiOjE2Nzg1NjE1ODZ9.cAqdxnf61FCA3rA4V9cpVF-J95BsTjRfbFBcc4qcMgM
+
+
+# Register a new restaurant
+POST {{base_uri}}/restaurant {{version}}
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+    "name": "Bawarchi",
+    "address": "RTC X Roads, Hyderabad",
+    "lat": 17.385044,
+    "lng": 78.486671,
+    "userId": "63ee8747914b5e1ba2dd8682",
+    "cuisine": ["Indian", "Chinese", "Italian"],
+    "timings": {
+        "monday": {
+            "open": "10:50",
+            "close": "23:30"
+        },
+        "tuesday": {
+            "open": "10:00",
+            "close": "23:30"
+        },
+        "wednesday": {
+            "open": "10:00",
+            "close": "23:30"
+        },
+        "thursday": {
+            "open": "10:00",
+            "close": "23:30"
+        },
+        "friday": {
+            "open": "10:00",
+            "close": "23:30"
+        },
+        "saturday": {
+            "open": "10:00",
+            "close": "23:30"
+        },
+        "sunday": {
+            "open": "10:00",
+            "close": "23:59"
+        }
+    }
+}

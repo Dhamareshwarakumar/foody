@@ -3,10 +3,11 @@ import './login.css';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify'
+import { useGoogleLogin } from '@react-oauth/google';
 
 import { setFormType } from '../../features/authSlice';
 import { setErrors } from '../../features/errorSlice';
-import { login, register, verifyOtp, forgotPassword, resetPassword } from '../../api/auth';
+import { login, register, verifyOtp, forgotPassword, resetPassword, oauthLogin } from '../../api/auth';
 
 import { InlineText, Input } from '../../components';
 
@@ -61,6 +62,15 @@ const Login = () => {
         dispatch(setErrors({}));
         dispatch(setFormType(name));
     }
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: tokenResponse => {
+            const { access_token: accessToken } = tokenResponse;
+
+            dispatch(oauthLogin(accessToken, 'google'));
+        },
+        onError: err => toast.error(err)
+    });
 
     useEffect(() => {
         document.title = 'Login | Foody';
@@ -143,7 +153,7 @@ const Login = () => {
                             {/* for register: Register */}
                             {/* for forgotPassword: Send OTP */}
                             {/* for otp and resetPassword: Submit */}
-                            {formType === 'login' ? 'Login' : formType === 'register' ? 'Register' : formType === 'forgotPassword' ? 'Send OTP' : 'Submit'}
+                            {loading ? 'Please Wait...' : formType === 'login' ? 'Login' : formType === 'register' ? 'Register' : formType === 'forgotPassword' ? 'Send OTP' : 'Submit'}
                         </button>
                     </div>
                     <div className="login__form-container__form__register">
@@ -163,7 +173,7 @@ const Login = () => {
                 <InlineText content='or' />
 
                 <div className="login__form-container__other">
-                    <button className="btn btn--outlined btn--outlined-inactive btn--round" onClick={() => toast('Google Login')}>
+                    <button className="btn btn--outlined btn--outlined-inactive btn--round" onClick={() => handleGoogleLogin()}>
                         <i className="fab fa-google"></i>
                     </button>
                     <button className='btn btn--outlined btn--outlined-inactive btn--round'>
